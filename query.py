@@ -73,23 +73,24 @@ def export_last_row_to_csv(
             comma=']'
         future_row2+=str(future_row1[i])+comma
     
+    # delete
     
     future_row=tuple(future_row1)
     last_row=tuple(last_row)
-    print(f'futurerow{future_row}')
-    #input_data=last_row.loc[0, :].values.flatten().tolist()
-    #input_data=last_row
-    #print(input_data)
-    #print(len(input_data))
     
+    future_row_data=list(future_row)
+    last_row_data=list(last_row)
     
-    
-    
-    print(future_row)
 
     last_row = normalizing(last_row)
     future_row = normalizing(future_row)
+
+    for i in range(11):
+        if future_row[i]>1:
+            future_row[i]=1    
+
     # Close the database connection
+
     conn.close()
 
     if last_row:
@@ -106,8 +107,8 @@ def export_last_row_to_csv(
             writer.writerow(future_row)  # Write the data row
         
         
-    return(name1, age1, sex1,future_row2,subtracted)
+    return(name1, age1, sex1,future_row2,subtracted, last_row_data, future_row_data)
 
 # Usage with default parameters
 
-name1, age1, sex1, future_row, subtract= export_last_row_to_csv()
+name1, age1, sex1, future_row, subtract, last_row_data, future_row_data= export_last_row_to_csv()

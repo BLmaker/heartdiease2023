@@ -42,8 +42,8 @@ def second_page(root):
           'Sex:'+sex_1+ '\n'+ \
            today1 + '\n'+\
     'According to our estimation,\n' + \
-         person_1  + '  has a heart diesease currently  on \n'+ \
-         'the forecasted features after 1 year are \n'+ \
+         person_1  + '  has a heart diesease currently. \n'+ \
+         'The forecasted features after 1 year are \n'+ \
          future_str +  ' \n' 
          
     if len(problems)==0:
