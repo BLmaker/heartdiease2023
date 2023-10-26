@@ -38,6 +38,7 @@ def submit():
     # For demonstration purposes, let's display a success message
     result_label.config(text="Data saved to the database")
 
+
 root = tk.Tk()
 root.title("User Interface")
 

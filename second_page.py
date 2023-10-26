@@ -1,7 +1,6 @@
 import tkinter as tk
 import pandas as pd
 #from query import name1, age1
-import query
 def second_page(root):
     # Create a new frame for the second page
     #print(name1)
@@ -22,8 +21,6 @@ def second_page(root):
         
     ####
     
-    
-
     
     
     if query.sex1==0:

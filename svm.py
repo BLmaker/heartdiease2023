@@ -70,3 +70,6 @@ def knn_fn(joe):
     joe=np.array(joe).reshape(1,-1)
     prediction_of_one_line=knn.predict(joe)
     return prediction_of_one_line[0]
+
+if __name__ == "__main__":
+    juan=[47,1,4,160,286,0,2,108,1,1.5,2]

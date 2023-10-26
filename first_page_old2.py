@@ -4,22 +4,21 @@ import pandas as pd
 from tkinter import PhotoImage
 from tkinter import font as tkfont
 from PIL import Image, ImageTk
-#from database import initialize_database, insert_data_into_tables
-#from second_page import second_page  # Import the second page module
-#from third_page import  third_page  # Import the third page module
-#from fourth_page import fourth_page  # Import the fourth page module
-from datetime import datetime
-import sql_functions as sq
-import functions as fn
-import NN11_test as nn
-import svm as svm
+from database import initialize_database, insert_data_into_tables
+from second_page import second_page  # Import the second page module
+from third_page import  third_page  # Import the third page module
+from fourth_page import fourth_page  # Import the fourth page module
+#from datetime import datetime
+
+from query import export_last_row_to_csv
+from NN11_test import predict_and_save_to_csv
 
 
 
 
 
 # Initialize the database (call this at the start of your application)
-#initialize_database()
+initialize_database()
 
 def switch_to_second_page():
     # Hide the first page
@@ -44,6 +43,23 @@ def switch_to_fourth_page():
 
 
 def submit():
+    # Get user input values from the Tkinter entry fields
+    lifestyle_data = [0,0,0,0,0,0,0,0,0,0]
+      
+    '''
+        smoke_entry.get(),
+        drink_entry.get(),
+        sodium_entry.get(),
+        fat_entry.get(),
+        act_entry.get(),
+        mass_entry.get(),
+        height_entry.get(),
+        stress_entry.get(),
+        slp_entry.get(),
+        wtr_entry.get(),
+        '''
+
+    
     
     user_input_data = [
     #   age_entry.get(),
@@ -60,141 +76,67 @@ def submit():
         oldpeak_entry.get(),
         slope_entry.get(),
     ]
-    #cp1=cp_entry.get()
-    
-    for i in [0,1,2,3,4,5,6,7,8,10]:
-        user_input_data[i]=int(user_input_data[i])
-    user_input_data[9]=float(user_input_data[9])
-    
+    #A=cp_entry.get()
+    #C.set(A)
+
     # Insert user input data into the database
     id_1=1
+    user_input_data[0]=id_1
+    #user_input_data[1]=datetime.now().strftime('%m/%d/%Y')
+    #print(user_input_data)
+    insert_data_into_tables(user_input_data)
+    # jung hoon
     
-    #personal_info=sq.user_id_fetch(id_1)
-   
-    
-   # producing current data and future data
-    
-    name,age,gender,next_year,future_output=fn.forecasting(id_1, user_input_data[2:])
-    user_input_data[0]=age
-    user_input_data[1]=gender
 
     
+    # Clear the Tkinter entry fields after submitting
+    '''
+    for entry in (smoke_entry, drink_entry, sodium_entry, fat_entry, act_entry, mass_entry, height_entry,
+                  #stress_entry, slp_entry, wtr_entry, age_entry, sex_entry, cp_entry, rbp_entry, chl_entry,
+                  stress_entry, slp_entry, wtr_entry, cp_entry, rbp_entry, chl_entry,
+                  fbs_entry, restecg_entry, thalach_entry, exang_entry, oldpeak_entry, slope_entry):
     
-    c_judge=[0]*7
-    f_judge=[0]*7
-    print(user_input_data)
-    print(future_output)
-    c_judge[0]=svm.svm_fn(user_input_data)
-    #print('svm')
-    c_judge[1]=svm.nb_fn(user_input_data)
-    #print('nb')
-    c_judge[2]=svm.dt_fn(user_input_data)
-    #print('dt')
-    c_judge[3]=svm.rf_fn(user_input_data)
-    #print('rf')
-    c_judge[4]=svm.lr_fn(user_input_data)
-    #print('lr')
-    c_judge[5]=svm.knn_fn(user_input_data)
-    #print('knn')
     
-    f_judge[0]=svm.svm_fn(future_output)
-    f_judge[1]=svm.nb_fn(future_output)
-    f_judge[2]=svm.dt_fn(future_output)
-    f_judge[3]=svm.rf_fn(future_output)
-    f_judge[4]=svm.lr_fn(future_output)
-    f_judge[5]=svm.knn_fn(future_output)
-    
-      
-    # neural network 
-    nn1=nn.diagnose(user_input_data)
-    nn2=nn.diagnose(future_output)
-    
-    c_judge[6]=nn1.tolist()[0][0]
-    f_judge[6]=nn2.tolist()[0][0]
-    
-    current1=any(c_judge) 
-    future1=any(f_judge) 
-    
-    #print(current1)
-    #print(future1)
-    testtime=datetime.now().strftime('%m/%d/%Y')
-    uid=user_input_data.copy()
-    sq.test_input(id_1,testtime,uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],\
-                  uid[8], uid[9],uid[10], int(current1))
+        entry.delete(0, tk.END)
+'''
+    export_last_row_to_csv()
+    predict_and_save_to_csv()
 
-    
-    if gender==0:
-        sex_1='female'
-        person_1='she'
-    else:
-        sex_1='male'
-        person_1='he'    
+    current_state = pd.read_csv("current_state.csv")
+    future_state = pd.read_csv("future_state.csv")
+    row_index = 0  # Replace with the row index you want
+    column_name = 'Binary_Predictions'  # Replace with the column name you want
 
-# problem pointing
-    subtract=[]
-    for i,j in zip(user_input_data, future_output):
-        subtract.append(i-j)        
-    problems = []
-    if subtract[3]<0:
-        problems.append('resting blood pressure')
-    if subtract[4]<0:
-        problems.append('serum blood cholestrol')
-    if subtract[7]<0:
-        problems.append('maximum heart rate')
-    if subtract[9]<0:
-        problems.append('ST-depression depth')
+    cell_value = current_state.at[row_index, column_name]   
+    future_value = future_state.at[row_index, column_name]   
     
-    future_str='Potential worsened feature(s):' + '\n'
     
-    if len(problems)==0:
-         future_str=future_str+'Nothing'
-    else:
-        for k in problems:
-            future_str=future_str+k+'\n'
+    #c.set(user_input_data)
     
- # text making    
-        
-    if current1 == 1: # he has heart dieases
-      text1='Name:'+name+ '\n' \
-            'Age:' + str(age) + '\n'\
-            'Sex:'+sex_1+ '\n'+ \
-             testtime + '\n'+\
-      'According to our estimation,\n' + \
-           person_1  + '  has a heart diesease currently. \n'+ \
-           ' \n'+ \
-           future_str +  ' \n' 
-
-    if current1 == 0: # he has no heart dieases
-        if future1 == 0:
-            text1='Name:'+name+ '\n' \
-                  'Age:' + str(age) + '\n'\
-                  'Sex:'+sex_1+ '\n'+ \
-                   testtime + '\n'+\
-            'According to our estimation,\n' + \
-            person_1 +'  may not have a heart disease. \n' +\
-            'It is not likely that you have the onset of heart disease 1 year later \n'+ \
-            future_str +  ' \n' 
-            
-                
-        else: # now okay, but later expected ill
-            text1='Name:'+name+ '\n' \
-                  'Age:' + str(age) + '\n'\
-                  'Sex:'+sex_1+ '\n'+ \
-                   testtime + '\n'+\
-            'According to our estimation,\n' + \
-            person_1 +'  may not have a heart disease. cuurently\n ' + \
-            'But, it is probable that he may have the onset of heart diease next year.\n'+ \
-            '\n'+ \
-            future_str  + ' \n' 
-    message_label = tk.Label(text=text1, font=("Helvetica", 12))
-    message_label.pack(padx=20, pady=20)
+    
+    
+    if cell_value == 1:
+      second_page(root)
+    if cell_value == 0:
+        if future_value == 0:
+            fourth_page(root)
+        else:
+            third_page(root)
+    return(user_input_data)
     
 
 
 
 root = tk.Tk()
 root.title("Heart Disease Application")
-####
+
+
+#### global variable  maker   #####
+
+
+
+
+#### global variable maker 2 #####
 
 # Load the background image
 #background_image = Image.open("g.jpg")  # Replace with the path to your image
@@ -224,7 +166,66 @@ User_frame = tk.Frame(first_page)
 User_frame.grid(row=0, column=1, padx=10)  # Place in the second column with padding
 
 
+# Lifestyle Section
+'''
+lifestyle_label = tk.Label(lifestyle_frame, text="Lifestyle", font = bold_font)
+lifestyle_label.grid(row=0, column=0, columnspan=2)
 
+smoke_label = tk.Label(lifestyle_frame, text="Smoking number of cigarrettes per day:")
+smoke_label.grid(row=1, column=0)
+smoke_entry = tk.Entry(lifestyle_frame)
+smoke_entry.grid(row=1, column=1)
+
+drink_label = tk.Label(lifestyle_frame, text="Alcohol consumption per week:")
+drink_label.grid(row=2, column=0)
+drink_entry = tk.Entry(lifestyle_frame)
+drink_entry.grid(row=2, column=1)
+
+sodium_label = tk.Label(lifestyle_frame, text="How much salt intake do you have per day:")
+sodium_label.grid(row=3, column=0)
+sodium_entry = tk.Entry(lifestyle_frame)
+sodium_entry.grid(row=3, column=1)
+
+fat_label = tk.Label(lifestyle_frame, text="Amount of saturated and trans fat intake per week:")
+fat_label.grid(row=4, column=0)
+fat_entry = tk.Entry(lifestyle_frame)
+fat_entry.grid(row=4, column=1)
+
+act_label = tk.Label(lifestyle_frame, text="How much do you exercise per day:")
+act_label.grid(row=5, column=0)
+act_entry = tk.Entry(lifestyle_frame)
+act_entry.grid(row=5, column=1)
+
+mass_label = tk.Label(lifestyle_frame, text="What is your weight:")
+mass_label.grid(row=6, column=0)
+mass_entry = tk.Entry(lifestyle_frame)
+mass_entry.grid(row=6, column=1)
+
+height_label = tk.Label(lifestyle_frame, text="what is your height:")
+height_label.grid(row=7, column=0)
+height_entry = tk.Entry(lifestyle_frame)
+height_entry.grid(row=7, column=1)
+
+stress_label = tk.Label(lifestyle_frame, text="How many times a day do you feel stressed:")
+stress_label.grid(row=8, column=0)
+stress_entry = tk.Entry(lifestyle_frame)
+stress_entry.grid(row=8, column=1)
+
+slp_label = tk.Label(lifestyle_frame, text="Average Sleep hours in 24hrs:")
+slp_label.grid(row=9, column=0)
+slp_entry = tk.Entry(lifestyle_frame)
+slp_entry.grid(row=9, column=1)
+
+wtr_label = tk.Label(lifestyle_frame, text="Your water consumption daily (litres):")
+wtr_label.grid(row=10, column=0)
+wtr_entry = tk.Entry(lifestyle_frame)
+wtr_entry.grid(row=10, column=1)
+
+# Sensor Reading Data Section
+sensor_label = tk.Label(User_frame, text="User Input", font = bold_font)
+sensor_label.grid(row=0, column=2, columnspan=2, sticky='n')
+
+'''
 # loading file
 
 '''
@@ -240,6 +241,7 @@ sex_label.grid(row=2, column=2)
 sex_entry = tk.Entry(User_frame)
 sex_entry.grid(row=2, column=3)
 '''
+
 
 
 cp_label = tk.Label(User_frame, text="[1]Chest Pain type:(1-4)")
@@ -307,6 +309,8 @@ slope_entry = tk.Entry(User_frame)
 slope_entry.grid(row=11, column=3)
 
 
+
+
 #slope1=float(slope_entry)
 
 #print(cp_entry)
@@ -321,7 +325,6 @@ slope_entry.grid(row=11, column=3)
 submit_button = tk.Button(first_page, text="Submit", command=submit)
 submit_button.grid(row=1, column=0, columnspan=2)  # Place in the main frame
 
-#user_input_data=[cp0, trestbps0, chol0, fbs0, restecg0, thalach0, exang0, oldpeak0, slope0]
 
 # Create a label to display the result
 result_label = tk.Label(first_page, text="")
