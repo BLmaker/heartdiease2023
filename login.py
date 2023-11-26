@@ -69,7 +69,9 @@ class LoginPage:
         self.registration_status = tk.Label(root, text="")
         self.registration_status.pack()
 
-        
+       
+
+    
     
     
     def login(self):
